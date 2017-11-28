@@ -1,14 +1,14 @@
 # MailConfirm
-A Node Js API for email validation forked from Elias Hussary <eliashussary@gmail.com>;
+Node Js API for email validation forked from Elias Hussary <eliashussary@gmail.com>
 * email pattern validation,
 * MX mail server existence,
 * mailbox existence.
 
-*NOTE: True mailbox existence may only be performed, with certainty, by sending a verification email and having the user verify their email.*
+*NOTE: True mailbox existence may only be performed by sending a verification email*
 
 ## Install
 ```sh
-npm i mail-confirm
+npm install https://github.com/guillim/npm-check
 ```
 
 ## Usage
@@ -21,7 +21,7 @@ import MailConfirm from 'mail-confirm'
 // promises
 const email = new MailConfirm({
     emailAddress: 'test@gmail.com',
-    timeout: 2000,
+    timeout: 5000,
     mailFrom: 'my@email.com',
     invalidMailboxKeywords: ['noreply', 'noemail']
 })
