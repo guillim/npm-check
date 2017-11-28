@@ -41,9 +41,10 @@ const resolveMx = hostname => {
  * @class MailConfirm
  */
 class MailConfirm {
-  constructor({ emailAddress, invalidMailboxKeywords, timeout, mailFrom }) {
+  constructor({ emailAddress, invalidMailboxKeywords, timeout, mailFrom, debug = false }) {
     this.state = {
       // args
+      debug: debug,
       emailAddress,
       timeout: timeout || 2000,
       invalidMailboxKeywords: invalidMailboxKeywords || [],
@@ -199,6 +200,7 @@ class MailConfirm {
   check() {
     var _this = this;
     return _asyncToGenerator(function* () {
+      testLog = _this.state.debug;
       // pattern check
       const isValidPattern = _this._resolvePattern(_this.state.emailAddress, _this.state.invalidMailboxKeywords);
       _this.state.isValidPattern = isValidPattern;
