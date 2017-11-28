@@ -16,6 +16,24 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 
 function log(testLog,whatToLog){if(testLog){console.log(whatToLog);}}
+function del(testLog,obj){
+  if (!testLog) {
+    delete obj.invalidMailboxKeywords;
+    delete obj.mailbox;
+    delete obj.hostname;
+    delete obj.mxRecords;
+    delete obj.smtpMessages;
+    delete obj.timeout;
+    delete obj.mailFrom;
+    delete obj.isComplete;
+    delete obj.status;
+    delete obj.smtpResponse;
+    delete obj.isValidPattern;
+    delete obj.isValidMx;
+    delete obj.isValidMailbox;
+    delete obj.debug;
+  }
+}
 
 /**
  * Find the MX records associated with the domain name of the website
@@ -61,7 +79,7 @@ class MailConfirm {
       isValidPattern: false,
       isValidMx: false,
       isValidMailbox: false,
-      result: ''
+      result: false,
     };
   }
 
@@ -207,7 +225,7 @@ class MailConfirm {
 
       if (!isValidPattern) {
 
-        _this.state.result = 'Email pattern is invalid.';
+        del(testLog,_this.state);
         return _this.state;
       }
       // mx check
@@ -219,7 +237,7 @@ class MailConfirm {
         _this.state.isValidMx = isValidMx;
 
         if (!isValidMx) {
-          _this.state.result = 'Email server is invalid or not available.';
+          del(testLog,_this.state);
           return _this.state;
         }
       } catch (err) {
@@ -241,7 +259,6 @@ class MailConfirm {
 
         _this.state.smtpMessages = smtpMessages;
         const isComplete = smtpMessages.length === 3;
-        let result = '';
 
         _this.state.isComplete = isComplete;
         if (isComplete) {
@@ -253,38 +270,20 @@ class MailConfirm {
 
           // OK RESPONSE
           if (status === 250) {
-            result = 'Mailbox is valid.';
-            _this.state.result = result;
+            _this.state.result = true;
             _this.state.isValidMailbox = true;
-          } else if(status === 550) {
-            result = 'Could not validate mailbox.';
-            _this.state.result = result;
-            _this.state.isValidMailbox = false;
           } else {
-            result = 'Mailbox is invalid.';
-            _this.state.result = result;
+            _this.state.result = false;
             _this.state.isValidMailbox = false;
           }
           // console.log(result);
         } else {
-          result = 'Could not validate mailbox.';
-          _this.state.result = result;
+          _this.state.result = false;
           _this.state.isValidMailbox = false;
           log(testLog,result);
         }
         //we don't want to print invalidMailboxKeywords, mailbox, hostname in the results
-        if (!testLog) {
-          delete _this.state.invalidMailboxKeywords;
-          delete _this.state.mailbox;
-          delete _this.state.hostname;
-          delete _this.state.mxRecords;
-          delete _this.state.smtpMessages;
-          delete _this.state.timeout;
-          delete _this.state.mailFrom;
-          delete _this.state.isComplete;
-          delete _this.state.status;
-          delete _this.state.smtpResponse;
-        }
+        del(testLog,_this.state);
 
         return _this.state;
       } catch (err) {
