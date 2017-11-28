@@ -1,0 +1,70 @@
+{
+  "_from": "mail-confirm",
+  "_id": "mail-confirm@1.0.3",
+  "_inBundle": false,
+  "_integrity": "sha512-OgpvAhzwAty9i8anpn3uDOzbDkPBHz+R0YJfjgntkIjxZjNZgsXUwLlD8WWkELwRU5OxHReWgSojymG6F+MuWw==",
+  "_location": "/mail-confirm",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "mail-confirm",
+    "name": "mail-confirm",
+    "escapedName": "mail-confirm",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/mail-confirm/-/mail-confirm-1.0.2.tgz",
+  "_shasum": "34aa37cfec21c485d4664a40f1481d61df6eb8a3",
+  "_spec": "mail-confirm",
+  "_where": "/Users/guillaumelancrenon/Documents/Github_folder/meteor_projects/emailcheckapi",
+  "author": {
+    "name": "guillaumelancrenon",
+    "email": "guigloo@msn.com"
+  },
+  "bugs": {
+    "url": "https://github.com/eliashussary/mail-confirm/issues"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "A Node Js API for three stage email validation including, pattern, MX, and mailbox existence validation.",
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-preset-env": "^1.6.0"
+  },
+  "homepage": "https://github.com/eliashussary/mail-confirm#readme",
+  "keywords": [
+    "mailgun",
+    "email",
+    "validation",
+    "mailbox",
+    "verification",
+    "smtp",
+    "email verification",
+    "email validation",
+    "mailbox validation",
+    "VRFY",
+    "EHLO",
+    "HELO",
+    "MAIL FROM",
+    "RCPT TO"
+  ],
+  "license": "MIT",
+  "main": "./build/index.js",
+  "name": "mail-confirm",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/guillim/mail-confirm.git"
+  },
+  "scripts": {
+    "build": "babel src --out-dir build",
+    "doc": "jsdoc2md ./build/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "1.0.3"
+}
