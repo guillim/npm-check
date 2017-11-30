@@ -146,13 +146,14 @@ class MailConfirm {
   static resolveSmtpMailbox({ emailAddress, mxRecords, timeout, mailFrom }) {
     return new Promise((resolve, reject) => {
       const host = mxRecords[0].exchange;
-      const commands = [`HELO ${host}`, `MAIL FROM: <${mailFrom}>`, `RCPT TO: <${emailAddress}>` ];
+      const commands = [`HELO ${host}`, `MAIL FROM: <${mailFrom}>`, `RCPT TO: <${emailAddress}>`, `QUIT` ];
 
       log(testLog,'commands');
       log(testLog,commands);
 
       const stepMax = commands.length - 1;
       let step = 0;
+      let receivedReadyMsg = false;
       const smtp = _net2.default.createConnection({ port: 25, host });
       let smtpMessages = [];
 
@@ -161,9 +162,7 @@ class MailConfirm {
 
       smtp.on('next', () => {
 
-        log(testLog,'step');
-        log(testLog,step);
-
+        log(testLog,'\r\n');
         if (step <= stepMax) {
           smtp.write(commands[step] + '\r\n');
           step++;
@@ -183,19 +182,43 @@ class MailConfirm {
       });
 
       smtp.on('data', data => {
-        log(testLog,'data for step='+step);
-        const status = parseInt(data.substring(0, 3));
-        if (step > 0) { //pour eviter d'avoir le retour du telnet
-          smtpMessages.push({
-            command: commands[step-1],
-            message: data,
-            status
-          });
-        }
-        if (status > 200) {
-          log(testLog,'next()');
-          smtp.emit('next');
-        }
+        let dataNoSpaces = data.replace('\r\n','');
+        log(testLog,'step='+step+'---- receivedReadyMsg='+ receivedReadyMsg+'---- data='+dataNoSpaces);
+        const status = parseInt(dataNoSpaces.substring(0, 3));
+        const regex = /(211|214|220|221|250|251|354|421|450|451|452|500|501|502|503|504|550|551|552|553|554) /g;
+        const containsAnotherStatus = regex.test(data.substring(3) );
+
+        /**
+          * we set up the telnet data (= data from telnet command) in order to skip it if telnet sends multiple times the answer 'ready 220'
+        */
+        if (receivedReadyMsg === false) {
+           log(testLog,'first telnet: next()');
+           receivedReadyMsg = true;
+           if (status > 200) {
+             smtp.emit('next');
+           }
+         }else if(status === 220 && !containsAnotherStatus){ /**    2eme message 220 qui arrive   */
+             log(testLog,'second telnet, doing nothing');
+         }else if(status === 220 && containsAnotherStatus){  /**    2eme message 220 qui arrive avec un autre message, car melange   */
+             log(testLog,'second telnet, mixed. going next()');
+             smtpMessages.push({
+               command: commands[step-1],
+               message: dataNoSpaces,
+               status
+             });
+             smtp.emit('next');
+         }else{
+           smtpMessages.push({
+             command: commands[step-1],
+             message: dataNoSpaces,
+             status
+           });
+           if (status > 200) {
+               log(testLog,'going next()');
+               smtp.emit('next');
+           }
+         }
+
       });
     });
   }
@@ -258,7 +281,7 @@ class MailConfirm {
         log(testLog,smtpMessages);
 
         _this.state.smtpMessages = smtpMessages;
-        const isComplete = smtpMessages.length === 3;
+        const isComplete = smtpMessages.length === 4;
 
         _this.state.isComplete = isComplete;
         if (isComplete) {
