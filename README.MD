@@ -1,10 +1,9 @@
-# MailConfirm
+# Email Check SIMPLE
 Node Js API for email validation forked from Elias Hussary <eliashussary@gmail.com>
 * email pattern validation,
 * MX mail server existence,
 * mailbox existence.
 
-*NOTE: True mailbox existence may only be performed by sending a verification email*
 
 ## Install
 ```sh
@@ -18,35 +17,25 @@ npm install https://github.com/guillim/npm-check
 ```Javascript
 import MailConfirm from 'mail-confirm'
 
-// promises
-const email = new MailConfirm({
-    emailAddress: 'test@gmail.com',
-    timeout: 5000,
-    mailFrom: 'my@email.com',
-    invalidMailboxKeywords: ['noreply', 'noemail']
-})
+const emailResponse = new MailConfirm({
+      emailAddress: 'emailToBeTested@gmail.com',
+      timeout: 8000,
+      mailFrom: 'my@email.com',
+      invalidMailboxKeywords: [],
+      debug : false
+});
 
-email.check().then(console.log).catch(console.log)
+return emailResponse.check();
 
-// async/await
-const check = async (emailAddress) => {
-    try{
-        const email = new MailConfirm({ emailAddress })
-        const result = await email.check()
-        return result
-    }catch(err){
-        throw new Error(err)
-    }
-}
-
-check('test@gmail.com')
 /*
 output =>
     {
-    emailAddress: 'test@gmail.com',
-    isValidPattern: true,
-    isValidMx: true,
-    isValidMailbox: false,
-    result: 'Could not validate mailbox.' }
+    emailAddress: 'emailToBeTested@gmail.com',
+    result: true }
   */
   ```
+  #### result = true
+*  means the email is verified *
+
+  #### result = false
+*  means the email could not be verified, or it is wrong *
