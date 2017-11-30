@@ -1,8 +1,6 @@
 'use strict';
-/**
- * testLog = true will print all the console.log in order to make debug easier
-*/
 
+/** testLog = true will print all the console.log in order to make debug easier */
 var testLog = false;
 
 
@@ -28,6 +26,7 @@ function del(testLog,obj){
     delete obj.isComplete;
     delete obj.status;
     delete obj.smtpResponse;
+    delete obj.isTimedout;
     delete obj.isValidPattern;
     delete obj.isValidMx;
     delete obj.isValidMailbox;
@@ -64,7 +63,7 @@ class MailConfirm {
       // args
       debug: debug,
       emailAddress,
-      timeout: timeout || 2000,
+      timeout: timeout || 10000,
       invalidMailboxKeywords: invalidMailboxKeywords || [],
       mailFrom: mailFrom || 'email@example.org',
       // helpers
@@ -76,6 +75,7 @@ class MailConfirm {
       status: 0,
       smtpResponse: '',
       // results
+      isTimedout: false,
       isValidPattern: false,
       isValidMx: false,
       isValidMailbox: false,
@@ -154,11 +154,21 @@ class MailConfirm {
       const stepMax = commands.length - 1;
       let step = 0;
       let receivedReadyMsg = false;
+
+      var timerForRefusedConnection;
+
       const smtp = _net2.default.createConnection({ port: 25, host });
       let smtpMessages = [];
 
       smtp.setEncoding('ascii');
-      smtp.setTimeout(timeout);
+
+      /** timer when the server refuses to allow us with a connection (happens after too many tries) */
+      timerForRefusedConnection = setTimeout(function() {
+          log(testLog,"TELENT refused: Connection exceeded timeout");
+          smtp.end();
+          resolve(smtpMessages);
+      }, timeout);
+
 
       smtp.on('next', () => {
 
@@ -167,6 +177,7 @@ class MailConfirm {
           smtp.write(commands[step] + '\r\n');
           step++;
         } else {
+          clearTimeout(timerForRefusedConnection);
           smtp.end(() => {
             resolve(smtpMessages);
           });
@@ -174,6 +185,7 @@ class MailConfirm {
       });
 
       smtp.on('error', err => {
+        clearTimeout(timerForRefusedConnection);
         smtp.end(() => {
           log(testLog,'err');
           log(testLog,err);
@@ -284,14 +296,15 @@ class MailConfirm {
         const isComplete = smtpMessages.length === 4;
 
         _this.state.isComplete = isComplete;
-        if (isComplete) {
-          const { status, message } = smtpMessages[2];
 
+
+        if (isComplete) {
+          log(testLog,'isComplete');
+
+          const { status, message } = smtpMessages[2];
           _this.state.status = status;
           _this.state.smtpResponse = message;
 
-
-          // OK RESPONSE
           if (status === 250) {
             _this.state.result = true;
             _this.state.isValidMailbox = true;
@@ -299,13 +312,12 @@ class MailConfirm {
             _this.state.result = false;
             _this.state.isValidMailbox = false;
           }
-          // console.log(result);
         } else {
+          log(testLog,'not Complete');
           _this.state.result = false;
           _this.state.isValidMailbox = false;
-          log(testLog,result);
+          _this.state.isTimedout = true;
         }
-        //we don't want to print invalidMailboxKeywords, mailbox, hostname in the results
         del(testLog,_this.state);
 
         return _this.state;
