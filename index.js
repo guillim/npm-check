@@ -276,7 +276,7 @@ class MailConfirm {
           return _this.state;
         }
       } catch (err) {
-        throw new Error('MX record check failed.');
+        log(testLog,'catch Error MX record check failed'); //throw new Error('MX record check failed.');
       }
 
       // mailbox check
@@ -322,7 +322,7 @@ class MailConfirm {
 
         return _this.state;
       } catch (err) {
-        throw new Error('Mailbox check failed.');
+        log(testLog,'catch Error Mailbox check failed'); //throw new Error('Mailbox check failed.');
       }
     })();
   }
